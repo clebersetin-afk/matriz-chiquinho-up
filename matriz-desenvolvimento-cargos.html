@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programa Chiquinho UP — Matriz de Desenvolvimento por Cargo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C8922A; --gold-bright:#E8A020; --gold-pale:#FFF0CC; --gold-tint:#FDF4E0;
+  --brown-dark:#2C1505; --brown-mid:#5C3010; --cream:#FDF8F0; --red:#D71920; --red-dark:#A8131A;
+  --crit:#D71920; --dev:#E8A020; --alto:#2E8B45; --pronto:#1888A0;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Nunito',sans-serif;background:linear-gradient(180deg,#F8EECA 0%,#FDF8F0 320px,#FDF8F0 100%);color:var(--brown-dark);}
+h1,h2,h3,.mont{font-family:'Montserrat',sans-serif;}
+.app{max-width:1180px;margin:0 auto;padding:0 16px 60px;}
+header.top{padding:26px 16px 18px;text-align:center;}
+header.top h1{font-size:1.5rem;font-weight:800;color:var(--brown-mid);margin:0 0 4px;letter-spacing:.2px;}
+header.top p{margin:0;color:var(--brown-mid);opacity:.75;font-size:.9rem;}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:18px 0 24px;position:sticky;top:0;background:rgba(253,248,240,.92);backdrop-filter:blur(6px);padding:10px 0;z-index:20;border-bottom:1px solid rgba(92,48,16,.12);}
+nav.tabs button{border:none;background:#fff;color:var(--brown-mid);padding:9px 16px;border-radius:999px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;box-shadow:0 1px 3px rgba(44,21,5,.12);transition:.15s;}
+nav.tabs button:hover{transform:translateY(-1px);}
+nav.tabs button.active{background:linear-gradient(135deg,var(--gold-bright),var(--gold));color:#fff;box-shadow:0 3px 10px rgba(200,146,42,.4);}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 14px rgba(44,21,5,.08);margin-bottom:18px;}
+.card h2{font-size:1.05rem;margin:0 0 14px;color:var(--brown-mid);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr;}}
+label{display:block;font-size:.72rem;font-weight:700;color:var(--brown-mid);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid #EADFC4;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.9rem;background:#FFFDF8;color:var(--brown-dark);}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold-bright);}
+.field{margin-bottom:12px;}
+.btn{border:none;border-radius:8px;padding:10px 18px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:.15s;}
+.btn-primary{background:linear-gradient(135deg,var(--gold-bright),var(--gold));color:#fff;}
+.btn-primary:hover{filter:brightness(1.05);}
+.btn-outline{background:#fff;border:1.5px solid var(--gold);color:var(--brown-mid);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-sm{padding:6px 12px;font-size:.72rem;}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-size:.72rem;font-weight:700;font-family:'Montserrat',sans-serif;}
+.pill-crit{background:#FDEAEA;color:var(--crit);}
+.pill-dev{background:#FDF1D8;color:#8a5c0d;}
+.pill-alto{background:#E5F5E9;color:var(--alto);}
+.pill-pronto{background:#E1F2F6;color:var(--pronto);}
+.emp-list{display:flex;flex-direction:column;gap:10px;}
+.emp-card{display:flex;justify-content:space-between;align-items:center;background:var(--gold-tint);border-radius:10px;padding:12px 14px;cursor:pointer;border:1px solid transparent;}
+.emp-card:hover{border-color:var(--gold);}
+.emp-card .name{font-weight:700;color:var(--brown-mid);font-family:'Montserrat',sans-serif;font-size:.9rem;}
+.emp-card .meta{font-size:.76rem;opacity:.75;margin-top:2px;}
+.emp-card .right{text-align:right;}
+.emp-card .idp{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.15rem;color:var(--brown-mid);}
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.filters input,.filters select{width:auto;flex:1;min-width:140px;}
+.trilha-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #F1E6C8;gap:10px;}
+.trilha-item:last-child{border-bottom:none;}
+.trilha-item .it-name{font-size:.86rem;flex:1;}
+.trilha-item select{width:200px;}
+.status-nao_iniciado{color:#999;}
+.status-andamento{color:#1888A0;}
+.status-concluido_prazo{color:var(--alto);}
+.status-concluido_excelencia{color:#8B2FBE;}
+.status-vencido{color:var(--red);}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed #EADFC4;font-size:.84rem;}
+.bar{height:7px;border-radius:4px;background:#EFE3C4;overflow:hidden;flex:1;margin:0 10px;}
+.bar > div{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
+.idp-hero{text-align:center;padding:18px 0 8px;}
+.idp-hero .num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:3rem;color:var(--brown-mid);line-height:1;}
+.idp-hero .num small{font-size:1rem;opacity:.6;}
+.badge-box{display:flex;align-items:center;gap:8px;background:var(--gold-pale);padding:8px 14px;border-radius:10px;font-weight:700;font-size:.85rem;color:var(--brown-mid);}
+.warn-box{background:#FDF1D8;border-left:4px solid var(--gold);padding:10px 14px;border-radius:8px;font-size:.82rem;margin-top:10px;}
+.ok-box{background:#E5F5E9;border-left:4px solid var(--alto);padding:10px 14px;border-radius:8px;font-size:.82rem;margin-top:10px;}
+table{width:100%;border-collapse:collapse;font-size:.84rem;}
+th{text-align:left;padding:8px 10px;color:var(--brown-mid);font-family:'Montserrat',sans-serif;font-size:.72rem;text-transform:uppercase;border-bottom:2px solid var(--gold-pale);}
+td{padding:8px 10px;border-bottom:1px solid #F3E9CE;}
+.kpi{background:linear-gradient(135deg,#fff,var(--gold-tint));border-radius:12px;padding:16px;text-align:center;}
+.kpi .num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.7rem;color:var(--brown-mid);}
+.kpi .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.3px;opacity:.7;}
+.ninebox-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.ninebox-cell{border-radius:12px;padding:14px;min-height:120px;}
+.ninebox-cell h4{margin:0 0 8px;font-size:.82rem;font-family:'Montserrat',sans-serif;}
+.chip{display:inline-block;background:#fff;padding:3px 9px;border-radius:999px;font-size:.72rem;margin:2px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.cell-star{background:#E1F2F6;}
+.cell-medg{background:#E5F5E9;}
+.cell-medp{background:#FDF1D8;}
+.cell-low{background:#FDEAEA;}
+.tag-config{background:#fff;border:1px dashed var(--gold);border-radius:8px;padding:12px;font-size:.78rem;margin-top:10px;}
+.report-select{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.report-out{background:#fff;border:1px solid #EADFC4;border-radius:10px;padding:18px;}
+.small-muted{font-size:.74rem;opacity:.65;}
+.flex-between{display:flex;justify-content:space-between;align-items:center;}
+.empty{text-align:center;padding:30px;opacity:.6;font-size:.88rem;}
+@media print{
+  nav.tabs,.no-print{display:none!important;}
+  body{background:#fff;}
+  .card{box-shadow:none;border:1px solid #ddd;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Programa Chiquinho UP</h1>
+    <p>Matriz de Desenvolvimento por Cargo · Franquia de Alimentação</p>
+    <div class="no-print" style="max-width:280px;margin:10px auto 0"><input id="input-avaliador" placeholder="Seu nome (fica registrado no histórico de alterações)" style="font-size:.78rem;text-align:center"></div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+  <div id="view"></div>
+  <footer style="text-align:center;padding:24px 0 8px;color:var(--brown-mid);opacity:.6;font-size:.74rem">
+    Desenvolvido por <b>Carlos Cleber da Silva Barros</b> · Consultor de Vendas e Gestão
+  </footer>
+</div>
+
+<script>
+/* ================= CONSTANTES ================= */
+const CARGOS = ['Estagiário','Atendente I','Atendente II','Coordenador de Loja','Gerente de Loja'];
+
+const TRILHAS = {
+  'Estagiário': ['Integração e Cultura Organizacional','História e Valores da Marca','Atendimento ao Cliente','Padrão de Produtos','Segurança Alimentar','Limpeza e Organização','Sistema Básico','Trabalho em Equipe','Comunicação Profissional'],
+  'Atendente I': ['Excelência no Atendimento','Padrão de Produtos','Porcionamento','Controle de Desperdícios','Sistema PDV','Vendas Adicionais','Experiência do Cliente','Organização e Limpeza','Gestão do Tempo'],
+  'Atendente II': ['Multiplicador de Treinamentos','Comunicação Assertiva','Solução de Problemas','Formação de Novos Colaboradores','Indicadores Operacionais','Cultura de Alta Performance','Liderança Inicial'],
+  'Coordenador de Loja': ['Liderança de Equipes','Gestão de Pessoas','Feedback e Desenvolvimento','Gestão de Conflitos','Escalas de Trabalho','Gestão de Indicadores','Controle de Estoque','Gestão de Perdas','Auditoria e Padrões','Gestão do Caixa','Formação de Sucessores'],
+  'Gerente de Loja': ['Liderança Estratégica','Gestão Financeira','DRE Simplificado','Gestão de Custos e Despesas','Gestão de Pessoas','Recrutamento e Seleção','Gestão por Indicadores','Planejamento Estratégico','Gestão Comercial','Gestão de Metas','Análise de Resultados','Gestão de Crises','Formação de Líderes']
+};
+
+const STATUS_LABELS = {
+  nao_iniciado:'Não iniciado', andamento:'Em andamento', concluido_prazo:'Concluído no prazo',
+  concluido_excelencia:'Concluído c/ excelência', vencido:'Vencido'
+};
+const STATUS_PONTOS = { concluido_prazo:100, concluido_excelencia:120, andamento:50, nao_iniciado:0, vencido:-20 };
+
+const NEXT_CARGO = {'Estagiário':'Atendente I','Atendente I':'Atendente II','Atendente II':'Coordenador de Loja','Coordenador de Loja':'Gerente de Loja','Gerente de Loja':null};
+
+const DEFAULT_CONFIG = {
+  // Tempo no cargo saiu da pontuação contínua (recompensava antiguidade, não mérito) e virou
+  // critério de elegibilidade mínima em "elegibilidade.tempoMinimoMeses" — ver eligibilidade().
+  pesos:{treinamentos:42,desempenho:33,competencias:15,assiduidade:10,tempoCargo:0},
+  tempoCargoFaixas:[{limite:6,pontos:25},{limite:12,pontos:50},{limite:24,pontos:75},{limite:Infinity,pontos:100}],
+  elegibilidade:{tempoMinimoMeses:6},
+  classBands:[{max:59,label:'Crítico',emoji:'🔴',css:'pill-crit'},{max:74,label:'Em Desenvolvimento',emoji:'🟡',css:'pill-dev'},{max:89,label:'Alto Potencial',emoji:'🟢',css:'pill-alto'},{max:100,label:'Pronto para Promoção',emoji:'🔵',css:'pill-pronto'}],
+  nineBox:{altoMin:80, medioMin:60},
+  promocao:{
+    estagiario_atendenteI:{idpMin:80, trilhaMin:100},
+    atendenteI_atendenteII:{idpMin:85, avaliacaoMin:8.0},
+    atendenteII_coordenador:{idpMin:90, competenciasMin:85},
+    coordenador_gerente:{idpMin:95}
+  }
+};
+
+/* ================= BACKEND (opcional) ================= */
+// Preencha estes dois campos DEPOIS de implantar o Code.gs no Google Apps Script.
+// Se deixar em branco, o sistema continua funcionando normalmente aqui no Claude via window.storage —
+// mas isso NÃO persiste se você hospedar este HTML fora do Claude (GitHub Pages etc).
+const BACKEND = {
+  APPS_SCRIPT_URL: '', // ex: 'https://script.google.com/macros/s/AKfycb.../exec'
+  TOKEN: ''            // o mesmo valor de SECRET_TOKEN definido no Code.gs
+};
+const HAS_BACKEND = !!BACKEND.APPS_SCRIPT_URL;
+const HAS_WINDOW_STORAGE = typeof window.storage !== 'undefined';
+
+async function apiCall(action, payload){
+  const res = await fetch(BACKEND.APPS_SCRIPT_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'}, // evita preflight CORS (limitação do Apps Script)
+    body: JSON.stringify({ action, token: BACKEND.TOKEN, payload })
+  });
+  const data = await res.json();
+  if(data && data.error){ console.error('Erro no backend:', data.error); alert('Erro ao salvar/carregar dados no Google Sheets: '+data.error); }
+  return data;
+}
+
+/* ================= ESTADO / STORAGE ================= */
+let state = { colaboradores:[], config:JSON.parse(JSON.stringify(DEFAULT_CONFIG)), snapshots:[], tab:'cadastro', selected:null, filtro:{loja:'',cargo:'',busca:''}, avaliadorAtual:'' };
+
+function logChange(colab, campo, de, para){
+  colab.log = colab.log || [];
+  colab.log.push({ data: new Date().toISOString(), campo, de: de??'—', para: para??'—', por: state.avaliadorAtual || null });
+}
+async function persistAvaliador(){
+  try{ if(HAS_WINDOW_STORAGE) await window.storage.set('chq-avaliador', state.avaliadorAtual); }catch(e){}
+}
+
+async function persistColabs(){
+  if(HAS_BACKEND){ await apiCall('saveColaboradores', state.colaboradores); return; }
+  if(HAS_WINDOW_STORAGE){ try{ await window.storage.set('chq-colaboradores', JSON.stringify(state.colaboradores)); }catch(e){console.error('storage set colaboradores',e);} }
+}
+async function persistConfig(){
+  if(HAS_BACKEND){ await apiCall('saveConfig', state.config); return; }
+  if(HAS_WINDOW_STORAGE){ try{ await window.storage.set('chq-config', JSON.stringify(state.config)); }catch(e){console.error('storage set config',e);} }
+}
+async function persistSnapshots(){
+  if(HAS_BACKEND){ await apiCall('saveSnapshots', state.snapshots); return; }
+  if(HAS_WINDOW_STORAGE){ try{ await window.storage.set('chq-snapshots', JSON.stringify(state.snapshots)); }catch(e){console.error('storage set snapshots',e);} }
+}
+
+async function loadAll(){
+  try{ if(HAS_WINDOW_STORAGE){ const r = await window.storage.get('chq-avaliador'); state.avaliadorAtual = r? r.value : ''; } }catch(e){ state.avaliadorAtual=''; }
+  if(HAS_BACKEND){
+    try{
+      const r = await apiCall('loadAll', {});
+      state.colaboradores = (r && r.colaboradores) || [];
+      state.config = (r && r.config) || JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+      state.snapshots = (r && r.snapshots) || [];
+    }catch(e){ console.error('Falha ao carregar do backend, iniciando vazio.', e); state.colaboradores=[]; state.config=JSON.parse(JSON.stringify(DEFAULT_CONFIG)); state.snapshots=[]; }
+    return;
+  }
+  if(HAS_WINDOW_STORAGE){
+    try{ const r = await window.storage.get('chq-colaboradores'); state.colaboradores = r? JSON.parse(r.value): []; }catch(e){ state.colaboradores = []; }
+    try{ const r = await window.storage.get('chq-config'); state.config = r? JSON.parse(r.value): JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }catch(e){ state.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+    try{ const r = await window.storage.get('chq-snapshots'); state.snapshots = r? JSON.parse(r.value): []; }catch(e){ state.snapshots = []; }
+    return;
+  }
+  state.colaboradores = []; state.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); state.snapshots = [];
+}
+
+function uuid(){ return 'c_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+
+/* ================= MOTOR DE CÁLCULO ================= */
+function statusEfetivo(colab, item, statusManual){
+  // Fecha a brecha de "deixar como não iniciado pra evitar o -20 de vencido":
+  // se houver prazo definido para o item e ele já passou, o status vira 'vencido'
+  // automaticamente, mesmo que o coordenador não tenha marcado isso manualmente.
+  const prazos = (colab.trilhaPrazos && colab.trilhaPrazos[colab.cargoAtual]) || {};
+  const prazo = prazos[item];
+  if(prazo && statusManual!=='concluido_prazo' && statusManual!=='concluido_excelencia'){
+    if(new Date(prazo) < new Date()) return 'vencido';
+  }
+  return statusManual;
+}
+function trilhaStats(colab){
+  const items = TRILHAS[colab.cargoAtual] || [];
+  const map = (colab.trilhaPorCargo && colab.trilhaPorCargo[colab.cargoAtual]) || {};
+  let total = items.length, completed=0, sum=0;
+  items.forEach(it=>{
+    const stManual = map[it] || 'nao_iniciado';
+    const st = statusEfetivo(colab, it, stManual);
+    sum += STATUS_PONTOS[st];
+    if(st==='concluido_prazo'||st==='concluido_excelencia') completed++;
+  });
+  const avgRaw = total? sum/total : 0;
+  const pct = total? Math.round((completed/total)*100) : 0;
+  return { total, completed, pct, avgRaw, normalized: Math.max(0, Math.min(100, avgRaw)) };
+}
+function tempoCargoMeses(colab){
+  const hist = colab.historicoPromocoes||[];
+  let startDate = colab.dataAdmissao;
+  const relevantes = hist.filter(h=>h.paraCargo===colab.cargoAtual).sort((a,b)=> new Date(b.data)-new Date(a.data));
+  if(relevantes.length) startDate = relevantes[0].data;
+  if(!startDate) return 0;
+  const start = new Date(startDate), now = new Date();
+  let months = (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth());
+  return Math.max(0, months);
+}
+function tempoCargoScore(colab){
+  const meses = tempoCargoMeses(colab);
+  for(const f of state.config.tempoCargoFaixas){ if(meses < f.limite) return f.pontos; }
+  return state.config.tempoCargoFaixas[state.config.tempoCargoFaixas.length-1].pontos;
+}
+const COMPETENCIAS_SUBITENS = ['comunicacao','trabalhoEquipe','proatividade','resolucaoProblemas'];
+const COMPETENCIAS_LABELS = {comunicacao:'Comunicação', trabalhoEquipe:'Trabalho em equipe', proatividade:'Proatividade', resolucaoProblemas:'Resolução de problemas'};
+const ASSIDUIDADE_SUBITENS = ['pontualidade','ausencias','cumprimentoEscala','posturaNormas'];
+const ASSIDUIDADE_LABELS = {pontualidade:'Pontualidade', ausencias:'Ausências (100 = nenhuma falta)', cumprimentoEscala:'Cumprimento de escala', posturaNormas:'Postura e normas internas'};
+
+function mediaSub(obj, campos){
+  if(!obj) return null;
+  const vals = campos.map(k=> obj[k]).filter(v=> v!==undefined && v!=='' && v!==null).map(Number);
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function desempenhoScore(c){ return Math.max(0, Math.min(100, (Number(c.avaliacaoDesempenho)||0)*10)); }
+function competenciasScore(c){
+  const m = mediaSub(c.competenciasSub, COMPETENCIAS_SUBITENS);
+  if(m!==null) return Math.max(0, Math.min(100, m));
+  return Math.max(0, Math.min(100, Number(c.competencias)||0)); // fallback: cadastro antigo
+}
+function assiduidadeScore(c){
+  const m = mediaSub(c.assiduidadeSub, ASSIDUIDADE_SUBITENS);
+  if(m!==null) return Math.max(0, Math.min(100, m));
+  return Math.max(0, Math.min(100, Number(c.assiduidade)||0)); // fallback: cadastro antigo
+}
+
+function calcIDP(colab){
+  const t = trilhaStats(colab).normalized;
+  const d = desempenhoScore(colab);
+  const comp = competenciasScore(colab);
+  const a = assiduidadeScore(colab);
+  const tc = tempoCargoScore(colab);
+  const p = state.config.pesos;
+  const idp = t*(p.treinamentos/100) + d*(p.desempenho/100) + comp*(p.competencias/100) + a*(p.assiduidade/100) + tc*(p.tempoCargo/100);
+  return { idp: Math.round(idp*10)/10, breakdown:{treinamentos:Math.round(t), desempenho:Math.round(d), competencias:Math.round(comp), assiduidade:Math.round(a), tempoCargo:Math.round(tc)} };
+}
+function classify(idp){
+  for(const b of state.config.classBands){ if(idp<=b.max) return b; }
+  return state.config.classBands[state.config.classBands.length-1];
+}
+function badgeFor(pct){
+  if(pct>=100) return {emoji:'💎',label:'Diamante'};
+  if(pct>=90) return {emoji:'🥇',label:'Ouro'};
+  if(pct>=80) return {emoji:'🥈',label:'Prata'};
+  if(pct>=70) return {emoji:'🥉',label:'Bronze'};
+  return null;
+}
+function tier(v){ return v>=state.config.nineBox.altoMin?'alto': (v>=state.config.nineBox.medioMin?'medio':'baixo'); }
+function nineBoxQuadrant(colab){
+  const {breakdown} = calcIDP(colab);
+  const desemp = breakdown.desempenho;
+  const potencial = (breakdown.treinamentos + breakdown.competencias)/2;
+  const td = tier(desemp), tp = tier(potencial);
+  if(td==='alto' && tp==='alto') return {key:'alto_alto', label:'Alto desempenho e alto potencial', emoji:'⭐', css:'cell-star'};
+  if(td==='alto' && tp==='medio') return {key:'alto_medio', label:'Alto desempenho e médio potencial', emoji:'🟩', css:'cell-medg'};
+  if(td==='medio' && tp==='alto') return {key:'medio_alto', label:'Médio desempenho e alto potencial', emoji:'🔷', css:'cell-medp'};
+  return {key:'baixo', label:'Baixo desempenho', emoji:'🔻', css:'cell-low'};
+}
+function eligibilidade(colab){
+  const {idp} = calcIDP(colab);
+  const ts = trilhaStats(colab);
+  const cfg = state.config.promocao;
+  const next = NEXT_CARGO[colab.cargoAtual];
+  if(!next) return { proximo:null, ok:false, motivos:['Cargo topo da trilha — sem próxima promoção definida.'] };
+  const meses = tempoCargoMeses(colab);
+  const tempoMin = state.config.elegibilidade.tempoMinimoMeses;
+  const motivoTempo = meses < tempoMin ? [`Tempo no cargo: ${meses} meses, abaixo do mínimo (${tempoMin})`] : [];
+  if(colab.cargoAtual==='Estagiário'){
+    const need = cfg.estagiario_atendenteI;
+    const motivos=[...motivoTempo]; if(idp<need.idpMin) motivos.push(`IDP ${idp} abaixo do mínimo (${need.idpMin})`); if(ts.pct<need.trilhaMin) motivos.push(`Trilha ${ts.pct}% abaixo do exigido (${need.trilhaMin}%)`);
+    return {proximo:next, ok:motivos.length===0, motivos};
+  }
+  if(colab.cargoAtual==='Atendente I'){
+    const need = cfg.atendenteI_atendenteII;
+    const av = Number(colab.avaliacaoDesempenho)||0;
+    const motivos=[...motivoTempo]; if(idp<need.idpMin) motivos.push(`IDP ${idp} abaixo do mínimo (${need.idpMin})`); if(av<need.avaliacaoMin) motivos.push(`Avaliação de desempenho ${av} abaixo do mínimo (${need.avaliacaoMin})`);
+    return {proximo:next, ok:motivos.length===0, motivos};
+  }
+  if(colab.cargoAtual==='Atendente II'){
+    const need = cfg.atendenteII_coordenador;
+    const comp = competenciasScore(colab);
+    const motivos=[...motivoTempo]; if(idp<need.idpMin) motivos.push(`IDP ${idp} abaixo do mínimo (${need.idpMin})`); if(comp<need.competenciasMin) motivos.push(`Competências de liderança ${Math.round(comp)}% abaixo do exigido (${need.competenciasMin}%)`);
+    return {proximo:next, ok:motivos.length===0, motivos};
+  }
+  if(colab.cargoAtual==='Coordenador de Loja'){
+    const need = cfg.coordenador_gerente;
+    const motivos=[...motivoTempo]; if(idp<need.idpMin) motivos.push(`IDP ${idp} abaixo do mínimo (${need.idpMin})`); if(!colab.operacionalAcimaDaMeta) motivos.push('Resultado operacional da loja não confirmado acima da meta'); if(!colab.formacaoLiderancaCompleta) motivos.push('Formação completa de liderança não concluída');
+    return {proximo:next, ok:motivos.length===0, motivos};
+  }
+  return {proximo:null, ok:false, motivos:[]};
+}
+function fmtDate(d){ if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('pt-BR'); }
+
+/* ================= NAV / TABS ================= */
+const TABS = [
+  {id:'cadastro', label:'Cadastro'},
+  {id:'colaboradores', label:'Colaboradores'},
+  {id:'dashboard', label:'Dashboard'},
+  {id:'ninebox', label:'Matriz 9 Box'},
+  {id:'relatorios', label:'Relatórios'},
+  {id:'config', label:'Configurações'}
+];
+function renderTabs(){
+  const nav = document.getElementById('tabs');
+  nav.innerHTML = TABS.map(t=>`<button data-tab="${t.id}" class="${state.tab===t.id?'active':''}">${t.label}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=> b.onclick = ()=>{ state.tab=b.dataset.tab; state.selected=null; render(); });
+}
+
+/* ================= RENDER PRINCIPAL ================= */
+function render(){
+  renderTabs();
+  const view = document.getElementById('view');
+  if(state.tab==='cadastro') view.innerHTML = viewCadastro();
+  else if(state.tab==='colaboradores') view.innerHTML = state.selected ? viewDetalhe(state.selected) : viewLista();
+  else if(state.tab==='dashboard') view.innerHTML = viewDashboard();
+  else if(state.tab==='ninebox') view.innerHTML = viewNineBox();
+  else if(state.tab==='relatorios') view.innerHTML = viewRelatorios();
+  else if(state.tab==='config') view.innerHTML = viewConfig();
+  const av = document.getElementById('input-avaliador');
+  if(av){ av.value = state.avaliadorAtual; av.onchange = ()=>{ state.avaliadorAtual = av.value.trim(); persistAvaliador(); }; }
+  bindEvents();
+}
+
+/* ---------- CADASTRO ---------- */
+function viewCadastro(){
+  return `
+  <div class="card">
+    <h2>Cadastro de Colaborador</h2>
+    <div class="grid2">
+      <div class="field"><label>Nome do colaborador *</label><input id="f-nome" placeholder="Ex: Ana Souza"></div>
+      <div class="field"><label>Loja *</label><input id="f-loja" placeholder="Ex: Alfenas 01"></div>
+      <div class="field"><label>Cargo atual *</label><select id="f-cargo">${CARGOS.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Data de admissão *</label><input type="date" id="f-admissao"></div>
+      <div class="field"><label>Gestor responsável</label><input id="f-gestor" placeholder="Nome do gestor"></div>
+    </div>
+    <button class="btn btn-primary" id="btn-add-colab">Cadastrar colaborador</button>
+  </div>
+  <div class="card">
+    <div class="flex-between"><h2 style="margin:0">Colaboradores cadastrados (${state.colaboradores.length})</h2>
+    <button class="btn btn-outline btn-sm" data-goto="colaboradores">Ver lista completa →</button></div>
+  </div>`;
+}
+
+/* ---------- LISTA ---------- */
+function viewLista(){
+  const lojas = [...new Set(state.colaboradores.map(c=>c.loja))].filter(Boolean).sort();
+  let list = state.colaboradores.filter(c=>{
+    if(state.filtro.loja && c.loja!==state.filtro.loja) return false;
+    if(state.filtro.cargo && c.cargoAtual!==state.filtro.cargo) return false;
+    if(state.filtro.busca && !c.nome.toLowerCase().includes(state.filtro.busca.toLowerCase())) return false;
+    return true;
+  });
+  list.sort((a,b)=> calcIDP(b).idp - calcIDP(a).idp);
+  return `
+  <div class="card">
+    <h2>Colaboradores</h2>
+    <div class="filters">
+      <input id="filtro-busca" placeholder="Buscar por nome..." value="${state.filtro.busca}">
+      <select id="filtro-loja"><option value="">Todas as lojas</option>${lojas.map(l=>`<option ${state.filtro.loja===l?'selected':''}>${l}</option>`).join('')}</select>
+      <select id="filtro-cargo"><option value="">Todos os cargos</option>${CARGOS.map(c=>`<option ${state.filtro.cargo===c?'selected':''}>${c}</option>`).join('')}</select>
+    </div>
+    <div class="emp-list">
+    ${list.length? list.map(c=>{
+      const {idp} = calcIDP(c); const cl = classify(idp);
+      return `<div class="emp-card" data-open="${c.id}">
+        <div><div class="name">${c.nome}</div><div class="meta">${c.cargoAtual} · ${c.loja}</div></div>
+        <div class="right"><div class="idp">${idp}</div><span class="pill ${cl.css}">${cl.emoji} ${cl.label}</span></div>
+      </div>`;
+    }).join('') : '<div class="empty">Nenhum colaborador encontrado. Cadastre o primeiro na aba Cadastro.</div>'}
+    </div>
+  </div>`;
+}
+
+/* ---------- DETALHE ---------- */
+function viewDetalhe(id){
+  const c = state.colaboradores.find(x=>x.id===id);
+  if(!c) return '<div class="empty">Colaborador não encontrado.</div>';
+  const {idp, breakdown} = calcIDP(c);
+  const cl = classify(idp);
+  const ts = trilhaStats(c);
+  const badge = badgeFor(ts.pct);
+  const elig = eligibilidade(c);
+  const items = TRILHAS[c.cargoAtual] || [];
+  const map = (c.trilhaPorCargo && c.trilhaPorCargo[c.cargoAtual]) || {};
+
+  return `
+  <button class="btn btn-outline btn-sm no-print" id="btn-back">← Voltar à lista</button>
+  <div class="card" style="margin-top:12px">
+    <div class="flex-between">
+      <div>
+        <h2 style="margin-bottom:2px">${c.nome}</h2>
+        <div class="small-muted">${c.cargoAtual} · ${c.loja} · Admissão em ${fmtDate(c.dataAdmissao)}${c.gestor? ' · Gestor: '+c.gestor:''}</div>
+      </div>
+      ${badge? `<div class="badge-box">${badge.emoji} ${badge.label}</div>`:''}
+    </div>
+    <div class="idp-hero">
+      <div class="num">${idp}<small>/100</small></div>
+      <span class="pill ${cl.css}">${cl.emoji} ${cl.label}</span>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div>
+        <div class="breakdown-row"><span>Treinamentos (${state.config.pesos.treinamentos}%)</span><div class="bar"><div style="width:${breakdown.treinamentos}%"></div></div><b>${breakdown.treinamentos}</b></div>
+        <div class="breakdown-row"><span>Desempenho (${state.config.pesos.desempenho}%)</span><div class="bar"><div style="width:${breakdown.desempenho}%"></div></div><b>${breakdown.desempenho}</b></div>
+        <div class="breakdown-row"><span>Competências (${state.config.pesos.competencias}%)</span><div class="bar"><div style="width:${breakdown.competencias}%"></div></div><b>${breakdown.competencias}</b></div>
+        <div class="breakdown-row"><span>Assiduidade (${state.config.pesos.assiduidade}%)</span><div class="bar"><div style="width:${breakdown.assiduidade}%"></div></div><b>${breakdown.assiduidade}</b></div>
+        <div class="small-muted" style="margin-top:6px">Tempo no cargo não entra mais na pontuação ponderada — virou critério de elegibilidade mínima (${tempoCargoMeses(c)} de ${state.config.elegibilidade.tempoMinimoMeses} meses exigidos).</div>
+      </div>
+      <div>
+        <div class="tag-config">Trilha: ${ts.completed}/${ts.total} concluídos (${ts.pct}%) · Tempo no cargo: ${tempoCargoMeses(c)} meses</div>
+        ${elig.proximo? (elig.ok? `<div class="ok-box"><b>✅ Apto para promoção → ${elig.proximo}</b></div>` : `<div class="warn-box"><b>Faltam para ${elig.proximo}:</b><br>${elig.motivos.join('<br>')}</div>`) : `<div class="warn-box">${elig.motivos.join('')}</div>`}
+        ${elig.proximo && elig.ok ? `<button class="btn btn-primary btn-sm no-print" style="margin-top:10px" id="btn-promover" data-id="${c.id}">Registrar promoção para ${elig.proximo}</button>` : (elig.proximo? `<button class="btn btn-outline btn-sm no-print" style="margin-top:10px" id="btn-promover-forcar" data-id="${c.id}">Registrar promoção manualmente (sem atingir critérios)</button>`:'')}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Trilha — ${c.cargoAtual}</h2>
+    <div class="small-muted" style="margin-bottom:8px">Defina um prazo por treinamento (opcional). Se o prazo passar e o item não estiver concluído, o sistema marca "Vencido" automaticamente — não depende do coordenador lembrar de mudar o status.</div>
+    ${items.map(it=>{
+      const stManual = map[it] || 'nao_iniciado';
+      const st = statusEfetivo(c, it, stManual);
+      const prazos = (c.trilhaPrazos && c.trilhaPrazos[c.cargoAtual]) || {};
+      const prazo = prazos[it] || '';
+      return `<div class="trilha-item">
+        <div class="it-name status-${st}">${it}${st!==stManual? ' <span class="small-muted">(auto: prazo vencido)</span>':''}</div>
+        <input type="date" data-trilha-prazo="${it}" data-id="${c.id}" value="${prazo}" style="width:140px">
+        <select data-trilha-item="${it}" data-id="${c.id}">
+          ${Object.entries(STATUS_LABELS).map(([k,l])=>`<option value="${k}" ${stManual===k?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card">
+    <h2>Indicadores complementares</h2>
+    <h3 style="font-size:.85rem;margin:6px 0">Competências comportamentais (${Math.round(competenciasScore(c))}% — média dos itens abaixo)</h3>
+    <div class="grid3">
+      ${COMPETENCIAS_SUBITENS.map(k=>`<div class="field"><label>${COMPETENCIAS_LABELS[k]}</label><input type="number" min="0" max="100" data-sub="competenciasSub.${k}" data-id="${c.id}" value="${(c.competenciasSub && c.competenciasSub[k])??''}"></div>`).join('')}
+    </div>
+    <h3 style="font-size:.85rem;margin:14px 0 6px">Assiduidade e disciplina (${Math.round(assiduidadeScore(c))}% — média dos itens abaixo)</h3>
+    <div class="grid3">
+      ${ASSIDUIDADE_SUBITENS.map(k=>`<div class="field"><label>${ASSIDUIDADE_LABELS[k]}</label><input type="number" min="0" max="100" data-sub="assiduidadeSub.${k}" data-id="${c.id}" value="${(c.assiduidadeSub && c.assiduidadeSub[k])??''}"></div>`).join('')}
+    </div>
+    <h3 style="font-size:.85rem;margin:14px 0 6px">Avaliação de desempenho</h3>
+    <div class="grid3">
+      <div class="field"><label>Nota (0 a 10)</label><input type="number" min="0" max="10" step="0.1" data-field="avaliacaoDesempenho" data-id="${c.id}" value="${c.avaliacaoDesempenho??''}"></div>
+    </div>
+    ${c.cargoAtual==='Coordenador de Loja'? `
+    <div class="grid2" style="margin-top:6px">
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-weight:600;"><input type="checkbox" style="width:auto" data-check="operacionalAcimaDaMeta" data-id="${c.id}" ${c.operacionalAcimaDaMeta?'checked':''}> Resultado operacional da loja acima da meta</label>
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-weight:600;"><input type="checkbox" style="width:auto" data-check="formacaoLiderancaCompleta" data-id="${c.id}" ${c.formacaoLiderancaCompleta?'checked':''}> Formação completa de liderança concluída</label>
+    </div>`:''}
+  </div>
+
+  <div class="card">
+    <h2>Histórico de promoções</h2>
+    ${c.historicoPromocoes && c.historicoPromocoes.length ? `<table><tr><th>Data</th><th>De</th><th>Para</th></tr>${c.historicoPromocoes.map(h=>`<tr><td>${fmtDate(h.data)}</td><td>${h.deCargo}</td><td>${h.paraCargo}</td></tr>`).join('')}</table>` : '<div class="small-muted">Sem promoções registradas.</div>'}
+  </div>
+
+  <div class="card">
+    <div class="flex-between"><h2 style="margin:0">Histórico de alterações</h2><span class="small-muted">Registrado como: <b>${state.avaliadorAtual || '(não identificado)'}</b></span></div>
+    ${c.log && c.log.length? `<table><tr><th>Data</th><th>Campo</th><th>De</th><th>Para</th><th>Por</th></tr>${[...c.log].reverse().slice(0,25).map(l=>`<tr><td>${new Date(l.data).toLocaleString('pt-BR')}</td><td>${l.campo}</td><td>${l.de}</td><td>${l.para}</td><td>${l.por||'—'}</td></tr>`).join('')}</table><div class="small-muted">Mostrando as últimas 25 alterações de ${c.log.length}.</div>` : '<div class="small-muted">Sem alterações registradas ainda.</div>'}
+  </div>
+
+  <div class="card no-print">
+    <button class="btn btn-danger btn-sm" id="btn-remover" data-id="${c.id}">Remover colaborador</button>
+  </div>`;
+}
+
+/* ---------- DASHBOARD ---------- */
+function viewDashboard(){
+  const cs = state.colaboradores;
+  if(!cs.length) return '<div class="card empty">Cadastre colaboradores para visualizar o dashboard.</div>';
+  const withIdp = cs.map(c=>({c, idp:calcIDP(c).idp}));
+  const media = Math.round((withIdp.reduce((s,x)=>s+x.idp,0)/withIdp.length)*10)/10;
+  const prontos = withIdp.filter(x=>x.idp>=90).length;
+  const criticos = withIdp.filter(x=>x.idp<=59).length;
+  let vencidos = 0;
+  cs.forEach(c=>{ const items=TRILHAS[c.cargoAtual]||[]; const map=(c.trilhaPorCargo&&c.trilhaPorCargo[c.cargoAtual])||{}; items.forEach(it=>{ if((map[it]||'nao_iniciado')==='vencido') vencidos++; }); });
+
+  const porLoja = {}; cs.forEach(c=>{ (porLoja[c.loja]=porLoja[c.loja]||[]).push(c); });
+  const rankingLoja = Object.entries(porLoja).map(([loja,arr])=>({loja, media: Math.round((arr.reduce((s,c)=>s+calcIDP(c).idp,0)/arr.length)*10)/10})).sort((a,b)=>b.media-a.media);
+
+  const porCargo = {}; cs.forEach(c=>{ (porCargo[c.cargoAtual]=porCargo[c.cargoAtual]||[]).push(c); });
+  const rankingCargo = CARGOS.filter(c=>porCargo[c]).map(cg=>({cargo:cg, media: Math.round((porCargo[cg].reduce((s,c)=>s+calcIDP(c).idp,0)/porCargo[cg].length)*10)/10}));
+
+  const rankingRede = [...withIdp].sort((a,b)=>b.idp-a.idp).slice(0,10);
+
+  const aptos = cs.filter(c=> eligibilidade(c).ok);
+
+  const pendentes = [];
+  cs.forEach(c=>{ const items=TRILHAS[c.cargoAtual]||[]; const map=(c.trilhaPorCargo&&c.trilhaPorCargo[c.cargoAtual])||{}; items.forEach(it=>{ const st=map[it]||'nao_iniciado'; if(st==='andamento'||st==='nao_iniciado'||st==='vencido') pendentes.push({nome:c.nome, item:it, status:st}); }); });
+
+  const evolLabels = [...new Set(state.snapshots.map(s=>s.mes))].sort();
+  const evolMedia = evolLabels.map(m=>{ const arr = state.snapshots.filter(s=>s.mes===m); return Math.round((arr.reduce((s,x)=>s+x.idp,0)/arr.length)*10)/10; });
+
+  return `
+  <div class="grid3">
+    <div class="kpi"><div class="num">${cs.length}</div><div class="lbl">Colaboradores</div></div>
+    <div class="kpi"><div class="num">${media}</div><div class="lbl">IDP médio da rede</div></div>
+    <div class="kpi"><div class="num">${prontos}</div><div class="lbl">Prontos p/ promoção</div></div>
+  </div>
+  <div class="grid3" style="margin-top:12px">
+    <div class="kpi"><div class="num">${criticos}</div><div class="lbl">Colaboradores críticos</div></div>
+    <div class="kpi"><div class="num">${vencidos}</div><div class="lbl">Treinamentos vencidos</div></div>
+    <div class="kpi"><div class="num">${aptos.length}</div><div class="lbl">Aptos hoje</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="flex-between"><h2 style="margin:0">Evolução mensal (IDP médio da rede)</h2>
+    <button class="btn btn-outline btn-sm no-print" id="btn-snapshot">Registrar snapshot deste mês</button></div>
+    ${evolLabels.length? svgLine(evolLabels, evolMedia) : '<div class="small-muted">Nenhum snapshot registrado ainda. Clique em "Registrar snapshot" para começar a acompanhar a evolução mês a mês.</div>'}
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Ranking por loja</h2><table><tr><th>Loja</th><th>IDP médio</th></tr>${rankingLoja.map(r=>`<tr><td>${r.loja}</td><td><b>${r.media}</b></td></tr>`).join('')}</table></div>
+    <div class="card"><h2>Ranking por cargo</h2><table><tr><th>Cargo</th><th>IDP médio</th></tr>${rankingCargo.map(r=>`<tr><td>${r.cargo}</td><td><b>${r.media}</b></td></tr>`).join('')}</table></div>
+  </div>
+
+  <div class="card"><h2>Ranking geral da rede (top 10)</h2><table><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Loja</th><th>IDP</th></tr>${rankingRede.map((r,i)=>`<tr><td>${i+1}</td><td>${r.c.nome}</td><td>${r.c.cargoAtual}</td><td>${r.c.loja}</td><td><b>${r.idp}</b></td></tr>`).join('')}</table></div>
+
+  <div class="card"><h2>Aptos para promoção (${aptos.length})</h2>
+  ${aptos.length? aptos.map(c=>`<div class="emp-card" data-open="${c.id}"><div><div class="name">${c.nome}</div><div class="meta">${c.cargoAtual} → ${NEXT_CARGO[c.cargoAtual]}</div></div><div class="right idp">${calcIDP(c).idp}</div></div>`).join('') : '<div class="small-muted">Nenhum colaborador atingiu todos os critérios no momento.</div>'}</div>
+
+  <div class="card"><h2>Treinamentos pendentes (${pendentes.length})</h2>
+  ${pendentes.length? `<table><tr><th>Colaborador</th><th>Treinamento</th><th>Status</th></tr>${pendentes.slice(0,40).map(p=>`<tr><td>${p.nome}</td><td>${p.item}</td><td class="status-${p.status}">${STATUS_LABELS[p.status]}</td></tr>`).join('')}</table>${pendentes.length>40?`<div class="small-muted">Mostrando 40 de ${pendentes.length}.</div>`:''}` : '<div class="small-muted">Nenhum treinamento pendente.</div>'}</div>
+  `;
+}
+function svgLine(labels, values){
+  const w=600,h=140,pad=30;
+  const max=Math.max(100, ...values), min=Math.min(0, ...values);
+  const stepX = labels.length>1? (w-2*pad)/(labels.length-1) : 0;
+  const pts = values.map((v,i)=>{ const x=pad+i*stepX; const y = h-pad-((v-min)/(max-min||1))*(h-2*pad); return `${x},${y}`; });
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:150px">
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#C8922A" stroke-width="3"/>
+    ${pts.map((p,i)=>`<circle cx="${p.split(',')[0]}" cy="${p.split(',')[1]}" r="4" fill="#5C3010"/>`).join('')}
+    ${labels.map((l,i)=>`<text x="${pad+i*stepX}" y="${h-6}" font-size="10" text-anchor="middle" fill="#5C3010">${l}</text>`).join('')}
+  </svg>`;
+}
+
+/* ---------- 9 BOX ---------- */
+function viewNineBox(){
+  const cs = state.colaboradores;
+  if(!cs.length) return '<div class="card empty">Cadastre colaboradores para visualizar a Matriz 9 Box.</div>';
+  const groups = {alto_alto:[],alto_medio:[],medio_alto:[],baixo:[]};
+  cs.forEach(c=>{ groups[nineBoxQuadrant(c).key].push(c); });
+  const cell = (key,label,emoji,css)=> `<div class="ninebox-cell ${css}"><h4>${emoji} ${label} (${groups[key].length})</h4>${groups[key].map(c=>`<span class="chip" data-open="${c.id}" style="cursor:pointer">${c.nome} · ${calcIDP(c).idp}</span>`).join('') || '<span class="small-muted">Vazio</span>'}</div>`;
+  return `
+  <div class="card">
+    <h2>Matriz 9 Box — Mapa de Talentos</h2>
+    <div class="small-muted" style="margin-bottom:12px">Eixo Desempenho = Avaliação de desempenho normalizada. Eixo Potencial = média entre Treinamentos e Competências comportamentais. Faixas: baixo &lt; ${state.config.nineBox.medioMin}, médio ${state.config.nineBox.medioMin}–${state.config.nineBox.altoMin-1}, alto ≥ ${state.config.nineBox.altoMin}. Ajustável em Configurações.</div>
+    <div class="ninebox-grid">
+      ${cell('alto_alto','Alto desempenho e alto potencial','⭐','cell-star')}
+      ${cell('alto_medio','Alto desempenho e médio potencial','🟩','cell-medg')}
+      ${cell('medio_alto','Médio desempenho e alto potencial','🔷','cell-medp')}
+      ${cell('baixo','Baixo desempenho','🔻','cell-low')}
+    </div>
+    <div class="warn-box" style="margin-top:14px">O documento original define apenas estas 4 categorias (não uma grade 3×3 completa). Por isso, qualquer combinação fora das 3 primeiras — inclusive desempenho médio/baixo ou alto desempenho com baixo potencial — cai no grupo "Baixo desempenho". Isso pode rotular incorretamente alguém com bom desempenho, mas baixo potencial de crescimento. Se isso gerar leituras estranhas, me avise que eu implemento a grade completa 3×3 (9 células).</div>
+  </div>
+  <div class="card"><h2>Banco de sucessores</h2>
+  ${(()=>{ const suc = cs.filter(c=> groups=nineBoxQuadrant(c).key==='alto_alto' || eligibilidade(c).ok);
+    const list = cs.filter(c=> nineBoxQuadrant(c).key==='alto_alto' || eligibilidade(c).ok);
+    return list.length? `<table><tr><th>Nome</th><th>Cargo atual</th><th>Loja</th><th>Sucessor para</th><th>IDP</th></tr>${list.map(c=>`<tr><td>${c.nome}</td><td>${c.cargoAtual}</td><td>${c.loja}</td><td>${NEXT_CARGO[c.cargoAtual]||'—'}</td><td><b>${calcIDP(c).idp}</b></td></tr>`).join('')}</table>` : '<div class="small-muted">Nenhum sucessor identificado ainda.</div>';
+  })()}</div>`;
+}
+
+/* ---------- RELATÓRIOS ---------- */
+function viewRelatorios(){
+  const opts = ['Individual de Desenvolvimento','Plano de Desenvolvimento Individual (PDI)','Sucessão','Ranking de Talentos','Indicadores de RH','Consolidado por Loja e Rede'];
+  return `
+  <div class="card no-print">
+    <h2>Relatórios Gerenciais</h2>
+    <div class="report-select">
+      <select id="rel-tipo">${opts.map(o=>`<option>${o}</option>`).join('')}</select>
+      <select id="rel-colab"><option value="">Selecione o colaborador (se aplicável)</option>${state.colaboradores.map(c=>`<option value="${c.id}">${c.nome} — ${c.loja}</option>`).join('')}</select>
+      <button class="btn btn-primary" id="btn-gerar-rel">Gerar relatório</button>
+      <button class="btn btn-outline" id="btn-print-rel">Imprimir / salvar PDF</button>
+    </div>
+  </div>
+  <div class="report-out" id="rel-out"><div class="small-muted">Selecione um tipo de relatório e clique em "Gerar relatório".</div></div>`;
+}
+function gerarRelatorio(tipo, colabId){
+  const cs = state.colaboradores;
+  if(tipo==='Individual de Desenvolvimento' || tipo==='Plano de Desenvolvimento Individual (PDI)'){
+    const c = cs.find(x=>x.id===colabId);
+    if(!c) return '<div class="warn-box">Selecione um colaborador.</div>';
+    const {idp, breakdown} = calcIDP(c); const cl = classify(idp); const ts = trilhaStats(c); const elig = eligibilidade(c);
+    const items = TRILHAS[c.cargoAtual]||[]; const map=(c.trilhaPorCargo&&c.trilhaPorCargo[c.cargoAtual])||{};
+    const pendentesItens = items.filter(it=>{ const st=map[it]||'nao_iniciado'; return st!=='concluido_prazo' && st!=='concluido_excelencia'; });
+    if(tipo==='Individual de Desenvolvimento'){
+      return `<h2 class="mont">Relatório Individual de Desenvolvimento</h2>
+      <p><b>${c.nome}</b> — ${c.cargoAtual} · ${c.loja} · Admissão ${fmtDate(c.dataAdmissao)}</p>
+      <p>IDP: <b>${idp}</b> — ${cl.emoji} ${cl.label} · Trilha concluída: ${ts.pct}%</p>
+      <table><tr><th>Indicador</th><th>Pontuação</th><th>Peso</th></tr>
+      <tr><td>Treinamentos</td><td>${breakdown.treinamentos}</td><td>40%</td></tr>
+      <tr><td>Desempenho</td><td>${breakdown.desempenho}</td><td>30%</td></tr>
+      <tr><td>Competências</td><td>${breakdown.competencias}</td><td>15%</td></tr>
+      <tr><td>Assiduidade</td><td>${breakdown.assiduidade}</td><td>10%</td></tr>
+      <tr><td>Tempo no cargo</td><td>${breakdown.tempoCargo}</td><td>5%</td></tr>
+      </table>
+      <p>${elig.proximo? (elig.ok? `Apto para promoção a ${elig.proximo}.` : `Pendências para ${elig.proximo}: ${elig.motivos.join('; ')}.`) : elig.motivos.join('')}</p>`;
+    }else{
+      return `<h2 class="mont">Plano de Desenvolvimento Individual (PDI)</h2>
+      <p><b>${c.nome}</b> — ${c.cargoAtual} · ${c.loja}</p>
+      <p>Objetivo: evoluir de ${c.cargoAtual} para ${NEXT_CARGO[c.cargoAtual]||'—'}.</p>
+      <p><b>Treinamentos pendentes/em risco:</b></p>
+      ${pendentesItens.length? `<table><tr><th>Treinamento</th><th>Status atual</th></tr>${pendentesItens.map(it=>`<tr><td>${it}</td><td class="status-${map[it]||'nao_iniciado'}">${STATUS_LABELS[map[it]||'nao_iniciado']}</td></tr>`).join('')}</table>` : '<p>Trilha 100% concluída.</p>'}
+      <p><b>Critérios de promoção pendentes:</b> ${elig.motivos.length? elig.motivos.join('; ') : 'Nenhum — apto para promoção.'}</p>`;
+    }
+  }
+  if(tipo==='Sucessão'){
+    const list = cs.filter(c=> nineBoxQuadrant(c).key==='alto_alto' || eligibilidade(c).ok);
+    return `<h2 class="mont">Relatório de Sucessão</h2>
+    ${list.length? `<table><tr><th>Nome</th><th>Cargo atual</th><th>Loja</th><th>Sucessor para</th><th>IDP</th></tr>${list.map(c=>`<tr><td>${c.nome}</td><td>${c.cargoAtual}</td><td>${c.loja}</td><td>${NEXT_CARGO[c.cargoAtual]||'—'}</td><td><b>${calcIDP(c).idp}</b></td></tr>`).join('')}</table>` : '<p>Nenhum sucessor identificado.</p>'}`;
+  }
+  if(tipo==='Ranking de Talentos'){
+    const ranked = [...cs].sort((a,b)=>calcIDP(b).idp-calcIDP(a).idp);
+    return `<h2 class="mont">Ranking de Talentos — Rede</h2>
+    <table><tr><th>#</th><th>Nome</th><th>Cargo</th><th>Loja</th><th>IDP</th><th>Classificação</th></tr>
+    ${ranked.map((c,i)=>{ const {idp}=calcIDP(c); const cl=classify(idp); return `<tr><td>${i+1}</td><td>${c.nome}</td><td>${c.cargoAtual}</td><td>${c.loja}</td><td><b>${idp}</b></td><td>${cl.emoji} ${cl.label}</td></tr>`; }).join('')}
+    </table>`;
+  }
+  if(tipo==='Indicadores de RH'){
+    if(!cs.length) return '<p>Sem dados.</p>';
+    const withIdp = cs.map(c=>calcIDP(c).idp);
+    const media = Math.round((withIdp.reduce((s,v)=>s+v,0)/withIdp.length)*10)/10;
+    const porCargo = {}; cs.forEach(c=>{ (porCargo[c.cargoAtual]=porCargo[c.cargoAtual]||[]).push(c); });
+    return `<h2 class="mont">Indicadores de RH — Rede</h2>
+    <p>Total de colaboradores: <b>${cs.length}</b> · IDP médio: <b>${media}</b></p>
+    <table><tr><th>Cargo</th><th>Qtde</th><th>IDP médio</th></tr>
+    ${CARGOS.filter(cg=>porCargo[cg]).map(cg=>{ const arr=porCargo[cg]; const m=Math.round((arr.reduce((s,c)=>s+calcIDP(c).idp,0)/arr.length)*10)/10; return `<tr><td>${cg}</td><td>${arr.length}</td><td><b>${m}</b></td></tr>`; }).join('')}
+    </table>`;
+  }
+  if(tipo==='Consolidado por Loja e Rede'){
+    const porLoja = {}; cs.forEach(c=>{ (porLoja[c.loja]=porLoja[c.loja]||[]).push(c); });
+    return `<h2 class="mont">Relatório Consolidado por Loja e Rede</h2>
+    ${Object.entries(porLoja).map(([loja,arr])=>{ const m=Math.round((arr.reduce((s,c)=>s+calcIDP(c).idp,0)/arr.length)*10)/10; return `<h3>${loja} — IDP médio ${m}</h3><table><tr><th>Nome</th><th>Cargo</th><th>IDP</th></tr>${arr.map(c=>`<tr><td>${c.nome}</td><td>${c.cargoAtual}</td><td>${calcIDP(c).idp}</td></tr>`).join('')}</table>`; }).join('')}`;
+  }
+  return '<p>Selecione um relatório.</p>';
+}
+
+/* ---------- CONFIG ---------- */
+function viewConfig(){
+  const cfg = state.config;
+  return `
+  <div class="card"><h2>Pesos dos indicadores (%)</h2>
+  <div class="grid3">
+    ${Object.entries(cfg.pesos).map(([k,v])=>`<div class="field"><label>${k}</label><input type="number" data-peso="${k}" value="${v}"></div>`).join('')}
+  </div>
+  <div class="small-muted">A soma deve totalizar 100%. Atual: ${Object.values(cfg.pesos).reduce((a,b)=>a+Number(b),0)}%. "tempoCargo" está com peso 0 de propósito — veja abaixo.</div></div>
+
+  <div class="card"><h2>Elegibilidade — Tempo mínimo no cargo</h2>
+  <div class="field" style="max-width:220px"><label>Meses mínimos no cargo atual para ser considerado promovível</label><input type="number" id="cfg-tempo-min" value="${cfg.elegibilidade.tempoMinimoMeses}"></div>
+  <div class="small-muted">Tempo no cargo deixou de ser pontuação contínua (recompensava antiguidade, não mérito) e agora é um requisito mínimo para elegibilidade — igual aos demais critérios de promoção abaixo.</div></div>
+
+  <div class="card"><h2>Faixas — Tempo no cargo (referência informativa, não pontua mais o IDP)</h2>
+  ${cfg.tempoCargoFaixas.map((f,i)=>`<div class="grid2"><div class="field"><label>Até quantos meses</label><input type="number" data-faixa-limite="${i}" value="${f.limite===Infinity?'':f.limite}" placeholder="${f.limite===Infinity?'sem limite (24+)':''}"></div><div class="field"><label>Pontos</label><input type="number" data-faixa-pontos="${i}" value="${f.pontos}"></div></div>`).join('')}</div>
+
+  <div class="card"><h2>Matriz 9 Box — limiares</h2>
+  <div class="grid2">
+    <div class="field"><label>Mínimo para "Alto"</label><input type="number" id="cfg-9box-alto" value="${cfg.nineBox.altoMin}"></div>
+    <div class="field"><label>Mínimo para "Médio"</label><input type="number" id="cfg-9box-medio" value="${cfg.nineBox.medioMin}"></div>
+  </div></div>
+
+  <div class="card"><h2>Critérios de promoção</h2>
+    <div class="grid2">
+      <div class="field"><label>Estagiário → Atendente I · IDP mínimo</label><input type="number" data-promo="estagiario_atendenteI.idpMin" value="${cfg.promocao.estagiario_atendenteI.idpMin}"></div>
+      <div class="field"><label>Estagiário → Atendente I · Trilha mínima (%)</label><input type="number" data-promo="estagiario_atendenteI.trilhaMin" value="${cfg.promocao.estagiario_atendenteI.trilhaMin}"></div>
+      <div class="field"><label>Atendente I → II · IDP mínimo</label><input type="number" data-promo="atendenteI_atendenteII.idpMin" value="${cfg.promocao.atendenteI_atendenteII.idpMin}"></div>
+      <div class="field"><label>Atendente I → II · Avaliação mínima (0-10)</label><input type="number" step="0.1" data-promo="atendenteI_atendenteII.avaliacaoMin" value="${cfg.promocao.atendenteI_atendenteII.avaliacaoMin}"></div>
+      <div class="field"><label>Atendente II → Coordenador · IDP mínimo</label><input type="number" data-promo="atendenteII_coordenador.idpMin" value="${cfg.promocao.atendenteII_coordenador.idpMin}"></div>
+      <div class="field"><label>Atendente II → Coordenador · Competências mínimas (%)</label><input type="number" data-promo="atendenteII_coordenador.competenciasMin" value="${cfg.promocao.atendenteII_coordenador.competenciasMin}"></div>
+      <div class="field"><label>Coordenador → Gerente · IDP mínimo</label><input type="number" data-promo="coordenador_gerente.idpMin" value="${cfg.promocao.coordenador_gerente.idpMin}"></div>
+    </div>
+    <div class="warn-box">O documento original pedia "nota mínima 4,0" para Atendente I → II, escala normalmente usada de 0 a 5. Como você escolheu escala 0 a 10 para a avaliação de desempenho, converti proporcionalmente para 8,0. Ajuste aqui se a intenção era 4,0 na escala de 0 a 10.</div>
+  </div>
+  <button class="btn btn-primary" id="btn-salvar-config">Salvar configurações</button>
+  <button class="btn btn-outline" id="btn-resetar-config">Restaurar padrão do documento</button>
+  `;
+}
+
+/* ================= EVENTOS ================= */
+function bindEvents(){
+  document.querySelectorAll('[data-goto]').forEach(b=> b.onclick=()=>{ state.tab=b.dataset.goto; render(); });
+  document.querySelectorAll('[data-open]').forEach(el=> el.onclick=()=>{ state.tab='colaboradores'; state.selected=el.dataset.open; render(); });
+
+  const back = document.getElementById('btn-back'); if(back) back.onclick=()=>{ state.selected=null; render(); };
+
+  const addBtn = document.getElementById('btn-add-colab');
+  if(addBtn) addBtn.onclick = async ()=>{
+    const nome = document.getElementById('f-nome').value.trim();
+    const loja = document.getElementById('f-loja').value.trim();
+    const cargoAtual = document.getElementById('f-cargo').value;
+    const dataAdmissao = document.getElementById('f-admissao').value;
+    const gestor = document.getElementById('f-gestor').value.trim();
+    if(!nome || !loja || !dataAdmissao){ alert('Preencha nome, loja e data de admissão.'); return; }
+    state.colaboradores.push({ id:uuid(), nome, loja, cargoAtual, dataAdmissao, gestor, historicoPromocoes:[], trilhaPorCargo:{}, trilhaPrazos:{}, avaliacaoDesempenho:'', competenciasSub:{}, assiduidadeSub:{}, operacionalAcimaDaMeta:false, formacaoLiderancaCompleta:false, log:[] });
+    await persistColabs();
+    state.tab='colaboradores'; render();
+  };
+
+  const fb = document.getElementById('filtro-busca'); if(fb) fb.oninput = ()=>{ state.filtro.busca=fb.value; render(); document.getElementById('filtro-busca').focus(); };
+  const fl = document.getElementById('filtro-loja'); if(fl) fl.onchange = ()=>{ state.filtro.loja=fl.value; render(); };
+  const fc = document.getElementById('filtro-cargo'); if(fc) fc.onchange = ()=>{ state.filtro.cargo=fc.value; render(); };
+
+  document.querySelectorAll('[data-trilha-item]').forEach(sel=> sel.onchange = async ()=>{
+    const c = state.colaboradores.find(x=>x.id===sel.dataset.id);
+    c.trilhaPorCargo = c.trilhaPorCargo || {}; c.trilhaPorCargo[c.cargoAtual] = c.trilhaPorCargo[c.cargoAtual] || {};
+    const de = c.trilhaPorCargo[c.cargoAtual][sel.dataset.trilhaItem] || 'nao_iniciado';
+    c.trilhaPorCargo[c.cargoAtual][sel.dataset.trilhaItem] = sel.value;
+    logChange(c, `Trilha: ${sel.dataset.trilhaItem}`, STATUS_LABELS[de], STATUS_LABELS[sel.value]);
+    await persistColabs(); render();
+  });
+  document.querySelectorAll('[data-trilha-prazo]').forEach(inp=> inp.onchange = async ()=>{
+    const c = state.colaboradores.find(x=>x.id===inp.dataset.id);
+    c.trilhaPrazos = c.trilhaPrazos || {}; c.trilhaPrazos[c.cargoAtual] = c.trilhaPrazos[c.cargoAtual] || {};
+    const de = c.trilhaPrazos[c.cargoAtual][inp.dataset.trilhaPrazo] || '(sem prazo)';
+    c.trilhaPrazos[c.cargoAtual][inp.dataset.trilhaPrazo] = inp.value;
+    logChange(c, `Prazo: ${inp.dataset.trilhaPrazo}`, de, inp.value||'(sem prazo)');
+    await persistColabs(); render();
+  });
+  document.querySelectorAll('[data-field]').forEach(inp=> inp.onchange = async ()=>{
+    const c = state.colaboradores.find(x=>x.id===inp.dataset.id);
+    const de = c[inp.dataset.field];
+    c[inp.dataset.field]=inp.value;
+    logChange(c, inp.dataset.field, de, inp.value);
+    await persistColabs(); render();
+  });
+  document.querySelectorAll('[data-sub]').forEach(inp=> inp.onchange = async ()=>{
+    const c = state.colaboradores.find(x=>x.id===inp.dataset.id);
+    const [grupo, campo] = inp.dataset.sub.split('.');
+    c[grupo] = c[grupo] || {};
+    const de = c[grupo][campo];
+    c[grupo][campo] = inp.value;
+    logChange(c, `${grupo}.${campo}`, de, inp.value);
+    await persistColabs(); render();
+  });
+  document.querySelectorAll('[data-check]').forEach(inp=> inp.onchange = async ()=>{
+    const c = state.colaboradores.find(x=>x.id===inp.dataset.id);
+    const de = c[inp.dataset.check];
+    c[inp.dataset.check]=inp.checked;
+    logChange(c, inp.dataset.check, de?'sim':'não', inp.checked?'sim':'não');
+    await persistColabs(); render();
+  });
+
+  const promBtn = document.getElementById('btn-promover');
+  if(promBtn) promBtn.onclick = async ()=>{
+    const c = state.colaboradores.find(x=>x.id===promBtn.dataset.id);
+    const next = NEXT_CARGO[c.cargoAtual];
+    if(!confirm(`Confirmar promoção de ${c.nome} para ${next}?`)) return;
+    c.historicoPromocoes = c.historicoPromocoes || [];
+    c.historicoPromocoes.push({ data: new Date().toISOString().slice(0,10), deCargo: c.cargoAtual, paraCargo: next });
+    c.cargoAtual = next;
+    await persistColabs(); render();
+  };
+  const promForcar = document.getElementById('btn-promover-forcar');
+  if(promForcar) promForcar.onclick = async ()=>{
+    const c = state.colaboradores.find(x=>x.id===promForcar.dataset.id);
+    const next = NEXT_CARGO[c.cargoAtual];
+    if(!confirm(`${c.nome} ainda não atingiu todos os critérios para ${next}. Confirmar promoção manual mesmo assim?`)) return;
+    c.historicoPromocoes = c.historicoPromocoes || [];
+    c.historicoPromocoes.push({ data: new Date().toISOString().slice(0,10), deCargo: c.cargoAtual, paraCargo: next });
+    c.cargoAtual = next;
+    await persistColabs(); render();
+  };
+  const remBtn = document.getElementById('btn-remover');
+  if(remBtn) remBtn.onclick = async ()=>{
+    if(!confirm('Remover este colaborador permanentemente?')) return;
+    state.colaboradores = state.colaboradores.filter(x=>x.id!==remBtn.dataset.id);
+    await persistColabs(); state.selected=null; render();
+  };
+
+  const snapBtn = document.getElementById('btn-snapshot');
+  if(snapBtn) snapBtn.onclick = async ()=>{
+    const mes = new Date().toISOString().slice(0,7);
+    state.snapshots = state.snapshots.filter(s=> !(s.mes===mes)); // limpa snapshots do mês atual antes de regravar
+    state.colaboradores.forEach(c=>{ state.snapshots.push({ mes, colaboradorId:c.id, idp: calcIDP(c).idp }); });
+    await persistSnapshots(); render();
+  };
+
+  const genRel = document.getElementById('btn-gerar-rel');
+  if(genRel) genRel.onclick = ()=>{
+    const tipo = document.getElementById('rel-tipo').value;
+    const colabId = document.getElementById('rel-colab').value;
+    const assinatura = `<div style="margin-top:22px;padding-top:10px;border-top:1px solid #EADFC4;font-size:.74rem;color:#5C3010;opacity:.7">Relatório gerado por <b>Carlos Cleber da Silva Barros</b> · Consultor de Vendas e Gestão · ${new Date().toLocaleDateString('pt-BR')}</div>`;
+    document.getElementById('rel-out').innerHTML = gerarRelatorio(tipo, colabId) + assinatura;
+  };
+  const printRel = document.getElementById('btn-print-rel');
+  if(printRel) printRel.onclick = ()=> window.print();
+
+  const tempoMin = document.getElementById('cfg-tempo-min'); if(tempoMin) tempoMin.onchange = ()=>{ state.config.elegibilidade.tempoMinimoMeses = Number(tempoMin.value); };
+  document.querySelectorAll('[data-peso]').forEach(inp=> inp.onchange = ()=>{ state.config.pesos[inp.dataset.peso]=Number(inp.value); });
+  document.querySelectorAll('[data-faixa-limite]').forEach(inp=> inp.onchange = ()=>{ const i=Number(inp.dataset.faixaLimite); state.config.tempoCargoFaixas[i].limite = inp.value===''? Infinity : Number(inp.value); });
+  document.querySelectorAll('[data-faixa-pontos]').forEach(inp=> inp.onchange = ()=>{ const i=Number(inp.dataset.faixaPontos); state.config.tempoCargoFaixas[i].pontos = Number(inp.value); });
+  const b9a = document.getElementById('cfg-9box-alto'); if(b9a) b9a.onchange = ()=>{ state.config.nineBox.altoMin=Number(b9a.value); };
+  const b9m = document.getElementById('cfg-9box-medio'); if(b9m) b9m.onchange = ()=>{ state.config.nineBox.medioMin=Number(b9m.value); };
+  document.querySelectorAll('[data-promo]').forEach(inp=> inp.onchange = ()=>{
+    const [grupo,campo] = inp.dataset.promo.split('.');
+    state.config.promocao[grupo][campo] = Number(inp.value);
+  });
+  const saveCfg = document.getElementById('btn-salvar-config');
+  if(saveCfg) saveCfg.onclick = async ()=>{ await persistConfig(); alert('Configurações salvas.'); render(); };
+  const resetCfg = document.getElementById('btn-resetar-config');
+  if(resetCfg) resetCfg.onclick = async ()=>{ if(!confirm('Restaurar todas as configurações para o padrão do documento original?')) return; state.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); await persistConfig(); render(); };
+}
+
+/* ================= INIT ================= */
+(async function init(){
+  await loadAll();
+  render();
+})();
+</script>
+</body>
+</html>
